@@ -45,7 +45,6 @@ export default function DividendTable({ initialData, isLoading }: { initialData:
             <th className="px-4 py-2 border">Price</th>
             <th className="px-4 py-2 border">4w Volume</th>
             <th className="px-4 py-2 border">Total Value</th>
-            <th className="px-4 py-2 border">Last Updated</th>
           </tr>
         </thead>
         <tbody>
@@ -56,16 +55,10 @@ export default function DividendTable({ initialData, isLoading }: { initialData:
               <td className="px-4 py-2 border text-sm">{row["Ex Date"]}</td>
               <td className="px-4 py-2 border text-sm">{row["Pay Date"]}</td>
               <td className="px-4 py-2 border font-medium text-green-700">${row.Amount?.toFixed(2) ?? "0.00"}</td>
-              <td className="px-4 py-2 border text-sm">{row.Yield}%</td>
-              <td className="px-4 py-2 border text-sm">{row.Price}$</td>
-              <td className="px-4 py-2 border text-sm">{row["4w Volume"]?.toLocaleString('de-DE') ?? "0"}$</td>
-              <td className="px-4 py-2 border text-sm">{row["Total Value"]?.toLocaleString('de-DE') ?? "0"}$</td>
-              <td className="px-4 py-2 border text-xs text-gray-400">
-                {isClient ? new Date(row["Last Updated"]).toLocaleString([], {
-                  dateStyle: 'short',
-                  timeStyle: 'short'
-                }) : "---"}
-              </td>
+              <td className="px-4 py-2 border text-sm">{(row.Yield * 100).toFixed(3)}%</td>
+              <td className="px-4 py-2 border text-sm">{row.Price?.toFixed(2) ?? "N/A "}$</td>
+              <td className="px-4 py-2 border text-sm">{row["4w Volume"]?.toLocaleString('de-DE') ?? "N/A "}$</td>
+              <td className="px-4 py-2 border text-sm">{row["Total Value"]?.toLocaleString('de-DE') ?? "N/A "}$</td>
             </tr>
           ))}
         </tbody>
