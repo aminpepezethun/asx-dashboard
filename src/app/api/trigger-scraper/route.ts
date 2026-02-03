@@ -23,10 +23,10 @@ export async function POST() {
             const diffInMinutes = diffInMs / (1000 * 60);
 
             // Gatekeepr
-            if (diffInMinutes < 15) {
+            if (diffInMinutes < 10) {
                 const waitTime = Math.ceil(15 - diffInMinutes);
                 return NextResponse.json({
-                    message: `Free tier has 15 minutes refresh wait time. Please wait for ${waitTime} minute(s) before refreshing. To use up 30 refresh per hours, please upgrade to higher tiers.`,
+                    message: `Free tier has 15 minutes refresh wait time. Please wait for ${waitTime} seconds(s) before refreshing. To use up to 30 refresh per hours, please upgrade to higher tiers.`,
                     isRateLimited: true
                 }, { status: 429 }
                 );
