@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export async function testGhConnection() {
+export async function GET() {
   const GITHUB_TOKEN = process.env.GITHUB_PAT;
   const REPO_OWNER = process.env.REPO_OWNER;
   const REPO_NAME = process.env.REPO_NAME;
