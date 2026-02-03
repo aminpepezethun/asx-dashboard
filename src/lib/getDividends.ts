@@ -11,7 +11,7 @@ const s3Client = new S3Client({
 
 export async function getDividends() {
     // 1. Check for Mock Mode
-    let useMock = true;
+    let useMock = false;
     if (useMock) {
         console.log("🛠️ Returning Mock Data");
         return dummy_dividends;
@@ -27,7 +27,15 @@ export async function getDividends() {
         const response = await s3Client.send(command);
         const bodyContents = await response.Body?.transformToString();
 
-        return bodyContents ? JSON.parse(bodyContents) : [];
+        if (!bodyContents) return [];
+
+        // Parse JSON directly
+        const data = JSON.parse(bodyContents);
+
+        return data.sort((a: any, b: any) => 
+            new Date(a["Ex Date"]).getTime() - new Date(b["Ex Date"]).getTime()
+        );
+
     } catch (error) {
         console.error("❌ S3 Error:", error);
         return []; // Return empty array so the UI doesn't crash

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const GITHUB_TOKEN = process.env.GITHUB_PAT;
-  const REPO_OWNER = process.env.REPO_OWNER;
-  const REPO_NAME = process.env.REPO_NAME;
+  const GITHUB_TOKEN = process.env.GITHUB_PAT!;
+  const REPO_OWNER = process.env.REPO_OWNER!;
+  const REPO_NAME = process.env.REPO_NAME!;
+
 
   try {
     // We call the basic repo GET endpoint to test credentials
@@ -15,11 +16,11 @@ export async function GET() {
           Authorization: `Bearer ${GITHUB_TOKEN}`,
           Accept: 'application/vnd.github.v3+json',
         },
+        cache: 'no-store',
       }
     );
 
-    const data = await response.json();
-
+    // Check for PAT validity
     if (response.status === 401) {
       return NextResponse.json({ 
         connected: false, 
@@ -27,12 +28,15 @@ export async function GET() {
       }, { status: 401 });
     }
 
+    // Check repo existence
     if (response.status === 404) {
       return NextResponse.json({ 
         connected: false, 
         error: "Repository not found. Check REPO_OWNER and REPO_NAME." 
       }, { status: 404 });
     }
+
+    const data = await response.json();
 
     return NextResponse.json({ 
       connected: true, 
