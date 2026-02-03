@@ -13,20 +13,29 @@ export async function POST() {
     try {
         // Fetch current data to check for timestamp
         const data = await getDividends();
+        const COOLDOWN_MINUTES = 10;
 
         if (data && data.length > 0) {
-            const lastUpdated = new Date(data[0]["Last Updated"]);
-            const now = new Date();
+            const lastUpdated = data[0]["Last Updated"];
+            
+            // Append 'Z' suffix if missing to force UTC parsing
+            const normalizedDate = lastUpdated.endsWith('Z') 
+                            ? lastUpdated 
+                            : `${lastUpdated}Z`;
+
+            // Get lastUpdatedMs and nowMs in the same UTC 
+            const lastUpdatedMs = new Date(normalizedDate).getTime();
+            const nowMs = Date.now();
 
             // Calculate difference in minutes
-            const diffInMs = now.getTime() - lastUpdated.getTime();
-            const diffInMinutes = diffInMs / (1000 * 60);
+            const diffInMinutes = (nowMs - lastUpdatedMs) / (1000 * 60);
 
             // Gatekeepr
-            if (diffInMinutes < 10) {
-                const waitTime = Math.ceil(15 - diffInMinutes);
+            if (diffInMinutes < COOLDOWN_MINUTES) {
+                const waitMinutes = Math.max(1, Math.ceil(COOLDOWN_MINUTES - diffInMinutes));
+
                 return NextResponse.json({
-                    message: `Free tier has 10 minutes refresh wait time. Please wait for ${waitTime} minute(s) before refreshing. To use up to 30 refresh per hours, please upgrade to higher tiers.`,
+                    message: `Free tier has a ${COOLDOWN_MINUTES} minutes refresh wait time. Please wait for ${waitMinutes} minute(s) before refreshing. To use up to 30 refresh per hours, please upgrade to higher tiers.`,
                     isRateLimited: true
                 }, { status: 429 }
                 );
