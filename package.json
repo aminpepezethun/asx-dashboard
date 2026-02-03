@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.981.0",
+    "@json2csv/plainjs": "^7.0.6",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
