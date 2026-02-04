@@ -27,7 +27,7 @@ export default function DividendContainer({ initialData, isInitiallyLoading }: {
 
   // Filter data: Ex-Date must be Today or in the Future
   const filteredData = useMemo(() => {
-    return data.filter(item => item["Ex Date"] >= todaySydney);
+    return data.filter(item => item["Ex Date"] > todaySydney);
   }, [data, todaySydney]);
 
 
