@@ -34,7 +34,7 @@ The application follows a strict data-flow pattern to ensure consistency:
 
 ## 🚀 Getting Started
 ### Prerequisites
-- Node.js 18.x or higher
+- Node.js 20.8 or higher
 
 - Next.js 14/15 (App Router)
 
