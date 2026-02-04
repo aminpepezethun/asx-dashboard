@@ -13,7 +13,7 @@ export async function POST() {
     try {
         // Fetch current data to check for timestamp
         const data = await getDividends();
-        const COOLDOWN_MINUTES = 10;
+        const COOLDOWN_MINUTES = 0;
 
         if (data && data.length > 0) {
             const lastUpdated = data[0]["Last Updated"];

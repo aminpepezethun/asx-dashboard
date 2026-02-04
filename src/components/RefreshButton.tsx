@@ -59,7 +59,7 @@ export default function RefreshButton({ onTrigger }: RefreshButtonProps) {
     return (
         <button 
             onClick={triggerScraper}
-            disabled={status === 'loading' || status === 'successs'}
+            disabled={status === 'loading' || status === 'success'}
             className={`px-4 py-2 rounded font-medium transition-all duration-200 shadow-sm ${getButtonStyles()}`}
         >
             {getButtonText()}

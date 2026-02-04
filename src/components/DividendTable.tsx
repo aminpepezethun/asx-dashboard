@@ -17,6 +17,15 @@ export default function DividendTable({ initialData, isLoading }: { initialData:
     item.Company.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Helper for consistent Australian formatting (Commas for thousands, dot for decimals)
+  const formatNumber = (val: number | undefined | null, decimals: number = 2) => {
+    if (val === undefined || val === null || isNaN(val)) return "N/A";
+    return val.toLocaleString('en-AU', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
+  };
+
   return (
     <div className="relative overflow-x-auto">
       {/* Visual Loading overlay */}
@@ -55,10 +64,10 @@ export default function DividendTable({ initialData, isLoading }: { initialData:
               <td className="px-4 py-2 border text-sm">{row["Ex Date"]}</td>
               <td className="px-4 py-2 border text-sm">{row["Pay Date"]}</td>
               <td className="px-4 py-2 border font-medium text-green-700">${row.Amount?.toFixed(2) ?? "0.00"}</td>
-              <td className="px-4 py-2 border text-sm">{(row.Yield * 100).toFixed(3)}%</td>
-              <td className="px-4 py-2 border text-sm">{row.Price?.toFixed(2) ?? "N/A "}$</td>
-              <td className="px-4 py-2 border text-sm">{row["4w Volume"]?.toLocaleString('de-DE') ?? "N/A "}$</td>
-              <td className="px-4 py-2 border text-sm">{row["Total Value"]?.toLocaleString('de-DE') ?? "N/A "}$</td>
+              <td className="px-4 py-2 border text-sm">{(row.Yield * 100).toFixed(2)}%</td>
+              <td className="px-4 py-2 border text-sm">${row.Price ? `${formatNumber(row.Price, 2)}` : "N/A"}</td>
+              <td className="px-4 py-2 border text-sm">${formatNumber(row["4w Volume"], 0)}</td>
+              <td className="px-4 py-2 border text-sm">${row["Total Value"] ? `$${formatNumber(row["Total Value"], 2)}` : "N/A"}</td>
             </tr>
           ))}
         </tbody>
