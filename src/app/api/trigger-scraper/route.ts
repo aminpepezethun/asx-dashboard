@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDividends } from "../../../lib/getDividends";
+import { getScraperStatus } from "@/src/lib/getScraperStatus";
 
 export async function POST() {
     const GITHUB_TOKEN=process.env.GITHUB_PAT;
@@ -10,10 +11,20 @@ export async function POST() {
         return NextResponse.json({ error: "Server configuration missing" }, { status: 500 });
     }
 
+    // Check if a job is ALREADY running 
+    const isRunning = await getScraperStatus();
+    if (isRunning) {
+        return NextResponse.json(
+            { message: "An update is already in progress. Please wait for it to complete before making another request." },
+            { status: 429 },
+        );
+    }
+
     try {
         // Fetch current data to check for timestamp
         const data = await getDividends();
-        const COOLDOWN_MINUTES = 0;
+        // Cooldown variables for local users
+        const COOLDOWN_MINUTES = 10;
 
         if (data && data.length > 0) {
             const lastUpdated = data[0]["Last Updated"];

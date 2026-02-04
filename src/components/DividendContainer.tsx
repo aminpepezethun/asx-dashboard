@@ -7,15 +7,15 @@ import DownloadCsvButton from "./DownloadCsvButton";
 import { DividendData } from "../types/dividends";
 import { processDataToSydneyTimezone } from '../lib/processDataToSydneyTimezone';
 
-export default function DividendContainer({ initialData }: { initialData: DividendData[] }) {
+export default function DividendContainer({ initialData, isInitiallyLoading }: { initialData: DividendData[]; isInitiallyLoading: boolean; }) {
   const [data, setData] = useState<DividendData[]>(() => processDataToSydneyTimezone(initialData));
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(isInitiallyLoading);
   const [currentTimestamp, setCurrentTimestamp] = useState(initialData[0]?.["Last Updated"]);
 
   // Logic to get the display timestamp from the processed data
   const lastUpdatedDisplay = data.length > 0 ? data[0]["Last Updated"] : "N/A";
 
-  // [FUNCTION] Calculate "Today in Sydney" as YYYY-MM-DD string
+  // Calculate "Today in Sydney" as YYYY-MM-DD string
   const todaySydney = useMemo(() => {
     return new Intl.DateTimeFormat("en-CA", {
       timeZone: "Australia/Sydney",
@@ -25,7 +25,7 @@ export default function DividendContainer({ initialData }: { initialData: Divide
     }).format(new Date());
   }, []);
 
-  // [FUNCTION] Filter data: Ex-Date must be Today or in the Future
+  // Filter data: Ex-Date must be Today or in the Future
   const filteredData = useMemo(() => {
     return data.filter(item => item["Ex Date"] >= todaySydney);
   }, [data, todaySydney]);
@@ -34,32 +34,31 @@ export default function DividendContainer({ initialData }: { initialData: Divide
   useEffect(() => {
     let interval: NodeJS.Timeout;
     let initialDelay: NodeJS.Timeout;
-    const MAX_WAIT_MS = 15 * 60 * 1000 // 15 minutes backoff limit
-    const startTime = Date.now()
+    const MAX_WAIT_MS = 15 * 60 * 1000; // 15 minutes
+    const startTime = Date.now();
 
-    // Helper to refresh state from S3
-      const updateLocalData = async () => {
-          try {
-              const res = await fetch('/api/all-dividends');
-              if (res.ok) {
-                  const freshData = await res.json();
-                  setData(processDataToSydneyTimezone(freshData));
-                  setCurrentTimestamp(freshData[0]?.["Last Updated"]);
-              }
-          } catch (err) {
-              console.error("Backoff fetch failed:", err);
-          } finally {
-              setIsUpdating(false);
-          }
-      };
+    const updateLocalData = async () => {
+      try {
+        const res = await fetch('/api/all-dividends');
+        if (res.ok) {
+          const freshData = await res.json();
+          setData(processDataToSydneyTimezone(freshData));
+          setCurrentTimestamp(freshData[0]?.["Last Updated"]);
+        }
+      } catch (err) {
+        console.error("Backoff fetch failed:", err);
+      } finally {
+        setIsUpdating(false);
+      }
+    };
 
     if (isUpdating) {
-      initialDelay = setTimeout(() => {
+      // 1. Define the polling function
+      const startPolling = () => {
+        console.log("🔄 Polling started...");
         interval = setInterval(async () => {
           if (Date.now() - startTime > MAX_WAIT_MS) {
-            console.warn("⚠️ 15-minute timeout reached. Stopping poll and fetching latest S3 state.");
             clearInterval(interval);
-            alert("The update is taking longer than expected. Returning to latest available data.");
             await updateLocalData();
             return;
           }
@@ -67,7 +66,6 @@ export default function DividendContainer({ initialData }: { initialData: Divide
             const res = await fetch('/api/check-status');
             const status = await res.json();
             
-            // Check for Successful update
             if (status.lastUpdated && status.lastUpdated !== currentTimestamp) {
               await updateLocalData();
               clearInterval(interval);
@@ -77,14 +75,23 @@ export default function DividendContainer({ initialData }: { initialData: Divide
             console.error("Polling error:", e);
           }
         }, 10000);
-      }, 120000);
+      };
+
+      // 2. Decide: Wait 2 mins (if new trigger) OR Start Now (if page refreshed)
+      if (isInitiallyLoading) {
+        startPolling();
+      } else {
+        console.log("⏳ New trigger detected. Waiting 2 minutes...");
+        initialDelay = setTimeout(startPolling, 120000);
+      }
     }
 
     return () => {
       clearInterval(interval);
       clearTimeout(initialDelay);
     };
-  }, [isUpdating, currentTimestamp]);
+    // Add isInitiallyLoading to the dependency array
+  }, [isUpdating, currentTimestamp, isInitiallyLoading]);
 
   return (
     <>
@@ -101,7 +108,10 @@ export default function DividendContainer({ initialData }: { initialData: Divide
         </div>
         
         <div className="flex gap-4">
-          <RefreshButton onTrigger={() => setIsUpdating(true)} />
+          <RefreshButton 
+            onTrigger={() => setIsUpdating(true)
+               
+            } isUpdating={isUpdating} />
           <DownloadCsvButton data={filteredData} />
         </div>
       </div>
