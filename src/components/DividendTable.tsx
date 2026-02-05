@@ -68,7 +68,7 @@ export default function DividendTable({ initialData, isLoading }: { initialData:
               <td className="px-4 py-2 border font-medium text-green-700">${row.Amount?.toFixed(2) ?? "N/A"}</td>
               <td className="px-4 py-2 border text-sm">{(row.Yield * 100).toFixed(2)}%</td>
               <td className="px-4 py-2 border text-sm">${row.Price ? `${formatNumber(row.Price, 2)}` : "N/A"}</td>
-              <td className="px-4 py-2 border text-sm">${formatNumber(row["4w Volume"], 0)}</td>
+              <td className="px-4 py-2 border text-sm">{formatNumber(row["4w Volume"], 0)}</td>
               <td className="px-4 py-2 border text-sm">${row["Total Value"] ? `${formatNumber(row["Total Value"], 2)}` : "N/A"}</td>
             </tr>
           ))}
