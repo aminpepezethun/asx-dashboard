@@ -5,12 +5,7 @@ import { DividendData } from '../types/dividends';
 
 export default function DividendTable({ initialData, isLoading }: { initialData: DividendData[]; isLoading: boolean; }) {
   // Client render for timestamp conversion
-  const [isClient, setIsClient] = useState(false);
   const [search, setSearch] = useState('');
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const filteredData = initialData.filter(item => 
     item.Code.toLowerCase().includes(search.toLowerCase()) ||
@@ -59,15 +54,22 @@ export default function DividendTable({ initialData, isLoading }: { initialData:
         <tbody>
           {filteredData.map((row, idx) => (
             <tr key={idx} className="hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-2 border font-mono font-bold text-blue-600">{row.Code}</td>
+              <td className="px-4 py-2 border font-mono font-bold text-blue-600">
+                <a href={`https://www.marketindex.com.au/asx/${row.Code.toLowerCase()}`}
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:underline"
+                > {row.Code}
+                </a>
+              </td>
               <td className="px-4 py-2 border text-sm">{row.Company}</td>
               <td className="px-4 py-2 border text-sm">{row["Ex Date"]}</td>
               <td className="px-4 py-2 border text-sm">{row["Pay Date"]}</td>
-              <td className="px-4 py-2 border font-medium text-green-700">${row.Amount?.toFixed(2) ?? "0.00"}</td>
+              <td className="px-4 py-2 border font-medium text-green-700">${row.Amount?.toFixed(2) ?? "N/A"}</td>
               <td className="px-4 py-2 border text-sm">{(row.Yield * 100).toFixed(2)}%</td>
               <td className="px-4 py-2 border text-sm">${row.Price ? `${formatNumber(row.Price, 2)}` : "N/A"}</td>
               <td className="px-4 py-2 border text-sm">${formatNumber(row["4w Volume"], 0)}</td>
-              <td className="px-4 py-2 border text-sm">${row["Total Value"] ? `$${formatNumber(row["Total Value"], 2)}` : "N/A"}</td>
+              <td className="px-4 py-2 border text-sm">${row["Total Value"] ? `${formatNumber(row["Total Value"], 2)}` : "N/A"}</td>
             </tr>
           ))}
         </tbody>

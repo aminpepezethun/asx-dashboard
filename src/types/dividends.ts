@@ -1,4 +1,5 @@
 export interface DividendData {
+    Link: string;
     Crawl_date: string;
     Code: string;
     Company: string;
