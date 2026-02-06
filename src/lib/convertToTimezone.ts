@@ -4,7 +4,7 @@ import { DividendData } from "../types/dividends";
  * Converts the "Last Updated" timestamp of all dividend items 
  * to a formatted Sydney/Australia time string.
  */
-export function processDataToSydneyTimezone(data: DividendData[]): DividendData[] {
+export function convertDataToAEDT(data: DividendData[]): DividendData[] {
   if (!data || data.length === 0) return [];
 
   return data.map((item) => {

@@ -5,10 +5,11 @@ import DividendTable from "./DividendTable";
 import RefreshButton from "./RefreshButton";
 import DownloadCsvButton from "./DownloadCsvButton";
 import { DividendData } from "../types/dividends";
-import { processDataToSydneyTimezone } from '../lib/processDataToSydneyTimezone';
+import { convertDataToAEDT } from '../lib/convertToTimezone';
+import { getTodayAEDT } from '../lib/utils';
 
 export default function DividendContainer({ initialData, isInitiallyLoading }: { initialData: DividendData[]; isInitiallyLoading: boolean; }) {
-  const [data, setData] = useState<DividendData[]>(() => processDataToSydneyTimezone(initialData));
+  const [data, setData] = useState<DividendData[]>(() => convertDataToAEDT(initialData));
   const [isUpdating, setIsUpdating] = useState(isInitiallyLoading);
   const [currentTimestamp, setCurrentTimestamp] = useState(initialData[0]?.["Last Updated"]);
 
@@ -17,12 +18,7 @@ export default function DividendContainer({ initialData, isInitiallyLoading }: {
 
   // Calculate "Today in Sydney" as YYYY-MM-DD string
   const todaySydney = useMemo(() => {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Australia/Sydney",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
+    return getTodayAEDT();  
   }, []);
 
   // Filter data: Ex-Date must be Today or in the Future
@@ -42,7 +38,7 @@ export default function DividendContainer({ initialData, isInitiallyLoading }: {
         const res = await fetch('/api/all-dividends');
         if (res.ok) {
           const freshData = await res.json();
-          setData(processDataToSydneyTimezone(freshData));
+          setData(convertDataToAEDT(freshData));
           setCurrentTimestamp(freshData[0]?.["Last Updated"]);
         }
       } catch (err) {
